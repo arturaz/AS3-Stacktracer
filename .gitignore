@@ -1,0 +1,7 @@
+# IntelliJ IDEA files
+.idea
+*.iml
+
+# SBT files
+project
+target
