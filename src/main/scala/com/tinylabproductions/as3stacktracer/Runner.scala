@@ -1,7 +1,8 @@
 package com.tinylabproductions.as3stacktracer
 
 import parser.AS3
-import util.parsing.input.CharSequenceReader
+import java.io.File
+import scalax.io._
 
 /**
  * Created by IntelliJ IDEA.
@@ -13,44 +14,17 @@ import util.parsing.input.CharSequenceReader
 
 object Runner {
   def main(args: Array[String]) {
-    val input = """package {
-   import flash.display.*;
-   import flash.errors.IllegalOperationError;
+    args.foreach { filename =>
+      println("processing %s".format(filename))
+      val file = new File(filename)
+      val input: Input = Resource.fromFile(file)
 
-   public class Trycatch2 extends Sprite {
+      val transformed = AS3.convert(filename, input.chars(Codec.UTF8))
 
-      /**
-       *   Application entry point
-       */
-      public function Trycatch2() {
-         test(1,2,3);
-      }
+      val output: Output = Resource.fromFile(file)
+      output.write(transformed)(Codec.UTF8)
+    }
 
-      private function test (a, b, c):void {
-         var a: int = 3;
-
-         for (var b: int = 10; b < 20; b++) {
-            var c: int = -10 - b;
-            test2();
-         }
-      }
-
-      private function test2():void {
-         throw new IllegalOperationError("I Suck!");
-      }
-   }
-}
-
-import flash.errors.IllegalOperationError;
-
-class X {
-   function Y() {
-      throw new IllegalOperationError("I Suck!");
-   }
-}
-"""
-    val parser = new AS3("test.as")
-    parser.parse(input)
-    println(parser.toString())
+    println("Done.")
   }
 }

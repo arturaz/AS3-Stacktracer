@@ -1,5 +1,8 @@
 package com.tinylabproductions.as3stacktracer.parser
 
+import annotation.tailrec
+import scope.File
+
 /**
  * Created by IntelliJ IDEA.
  * User: arturas
@@ -8,27 +11,34 @@ package com.tinylabproductions.as3stacktracer.parser
  * To change this template use File | Settings | File Templates.
  */
 
-
+object AS3 {
+  def convert(filename: String, input: Traversable[Char]): String = {
+    val parser = new AS3(filename)
+    parser.parse(input)
+    parser.output
+  }
+}
 
 class AS3(filename: String) {
-  private[this] var scope: Scope = new Scope.File(filename)
+  private[this] var scope: Scope = new File(filename)
 
-  def parse(input: String) = {
+  def parse(input: Traversable[Char]) = {
     input.foreach { char =>
       scope = scope.append(char)
     }
   }
 
-  override def toString = {
-    def traverse(scope: Scope, builder: StringBuilder): StringBuilder = {
+  def output: String = {
+    def traverse(scope: Scope, builder: StringBuilder) {
       scope.parts.foreach { part =>
         part match {
           case Left(str) => builder.append(str)
           case Right(childScope) => traverse(childScope, builder)
         }
       }
-      builder
     }
-    traverse(scope, new StringBuilder).toString
+    val builder = new StringBuilder
+    traverse(scope, builder)
+    builder.toString()
   }
 }

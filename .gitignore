@@ -3,5 +3,6 @@
 *.iml
 
 # SBT files
-project
+project/boot
+project/target
 target

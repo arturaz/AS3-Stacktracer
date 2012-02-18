@@ -1,0 +1,73 @@
+package com.tinylabproductions.as3stacktracer.parser.scope
+
+import util.matching.Regex.MatchData
+import com.tinylabproductions.as3stacktracer.parser.Scope
+
+/**
+ * Created by IntelliJ IDEA.
+ * User: arturas
+ * Date: 2/18/12
+ * Time: 12:06 PM
+ * To change this template use File | Settings | File Templates.
+ */
+
+private[scope] object Function extends Matcher {
+  protected[this] val matcher =
+    """(?x)
+    (
+      (var|const)(\s|\n)+([a-zA-Z_][\w]*).+?=(\s|\n)*
+    )? # anonymous functions assigned with var a = function
+    function
+    (\s|\n)* # whitespace
+    ([a-zA-Z_][\w]*)? # functions might not have a name
+    (\s|\n)* # whitespace
+    \((.*?)\) # arg list
+    .*? # type info
+    \{""".r
+
+  private[this] val ArgMatcher = """(?x)
+    ([a-zA-Z_][\w]*) # argument name
+    (\s|\n)* # whitespace
+    (:(\s|\n)*.+?)? # type declaration
+    (\s|\n)* # whitespace
+    (,|$) # arg separator or end of list
+  """.r
+
+  protected[this] def createScope(
+    matchData: MatchData, parent: Scope
+  ) = {
+    val name = matchData.group(7) match {
+      case null => matchData.group(4) // Anonymous function via var.
+      case s: String => s // Named function.
+    }
+    val body = matchData.group(0)
+    val scope = new Function(body, name, parent)
+
+    // Match function arguments
+    val argList = matchData.group(9)
+    ArgMatcher.findAllIn(argList).matchData.foreach { argMatchData =>
+      val argName = argMatchData.group(1)
+      scope.addVariable(argName)
+    }
+    
+    scope
+  }
+}
+
+private[scope] class Function(body: String, name: String, parent: Scope)
+  extends Block(body, name, parent) with CurlyBlock with HasVariables
+{
+  protected[this] val scopeType = "Function"
+  addPart(" try {")
+
+  def qualifiedName = "%s()".format(name)
+
+  protected val matchers = List(LocalVariable, Function)
+
+  protected def onClose() {
+    addPart(
+      """} catch (e: Error) { throw StacktraceError.trace(e, "%s", %s); } """.
+        format(fullName, variablesString)
+    )
+  }
+}
