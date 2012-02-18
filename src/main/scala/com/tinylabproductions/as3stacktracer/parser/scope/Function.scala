@@ -19,10 +19,13 @@ private[scope] object Function extends Matcher {
     )? # anonymous functions assigned with var a = function
     function
     (\s|\n)* # whitespace
+    (get|set)? # getter/setter support
+    (\s|\n)* # whitespace
     ([a-zA-Z_][\w]*)? # functions might not have a name
     (\s|\n)* # whitespace
     \((.*?)\) # arg list
     .*? # type info
+    (\s|\n)* # whitespace
     \{""".r
 
   private[this] val ArgMatcher = """(?x)
@@ -36,15 +39,20 @@ private[scope] object Function extends Matcher {
   protected[this] def createScope(
     matchData: MatchData, parent: Scope
   ) = {
-    val name = matchData.group(7) match {
+    val functionScope = matchData.group(7) match {
+      case null => None
+      case s: String => Some(s)
+    }
+
+    val name = matchData.group(9) match {
       case null => matchData.group(4) // Anonymous function via var.
       case s: String => s // Named function.
     }
     val body = matchData.group(0)
-    val scope = new Function(body, name, parent)
+    val scope = new Function(functionScope, body, name, parent)
 
     // Match function arguments
-    val argList = matchData.group(9)
+    val argList = matchData.group(11)
     ArgMatcher.findAllIn(argList).matchData.foreach { argMatchData =>
       val argName = argMatchData.group(1)
       scope.addVariable(argName)
@@ -54,13 +62,20 @@ private[scope] object Function extends Matcher {
   }
 }
 
-private[scope] class Function(body: String, name: String, parent: Scope)
-  extends Block(body, name, parent) with CurlyBlock with HasVariables
+private[scope] class Function(
+  functionScope: Option[String], body: String, name: String, parent: Scope
+) extends Block(body, name, parent) with CurlyBlock with HasVariables
 {
   protected[this] val scopeType = "Function"
   addPart(" try {")
 
-  def qualifiedName = "%s()".format(name)
+  def qualifiedName = "%s%s()".format(
+    functionScope match {
+      case Some(s) => "%s:".format(s)
+      case None => ""
+    },
+    name
+  )
 
   protected val matchers = List(LocalVariable, Function)
 

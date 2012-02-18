@@ -19,6 +19,7 @@ private[scope] object Class extends Matcher {
     ([a-zA-Z_]\w*) # class name
     (\s|\n)* # whitespace
     .*? # extends/implements
+    (\s|\n)* # whitespace
     \{""".r
 
   protected[this] def createScope(
