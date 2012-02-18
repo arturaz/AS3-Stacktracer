@@ -3,6 +3,7 @@
 *.iml
 
 # SBT files
+.history
 project/boot
 project/target
 target
