@@ -52,8 +52,9 @@ private[scope] object AbstractFunction {
     val returnType = createReturnType(matchData.group(15))
     create(functionScope, argList, returnType, body, name, parent)
   }
+
   private[scope] def createReturnType(signature: String) = signature match {
-    case null => Void
+    case null => Type.Void
     case s: String => Type.create(s)
   }
 

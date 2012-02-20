@@ -14,8 +14,19 @@ import com.tinylabproductions.as3stacktracer.parser.Scope
 private[scope] object StaticVariable extends Matcher {
   protected[this] val matcher =
     """(?x)
-      static.+?
-      (var|const)
+      ((
+        ([a-zA-Z_]\w*)? # namespace name here
+        (\s|\n)+
+        static
+        (\s|\n)+
+        (var|const)
+      )|(
+        static
+        (\s|\n)+
+        ([a-zA-Z_]\w*)? # namespace name here
+        (\s|\n)+
+        (var|const)
+      ))
       (\s|\n)+
       ([a-zA-Z_]\w*) # name
       (:|\s|\n)+ # require something so we wouldn't match until we have read
@@ -24,14 +35,20 @@ private[scope] object StaticVariable extends Matcher {
 
   protected[this] def createScope(matchData: MatchData, parent: Scope) = {
     val body = matchData.group(0)
-    val name = matchData.group(3)
-    new StaticVariable(body, name, parent)
+    val namespace = ClassVariable.createNamespace(
+      matchData.group(3), matchData.group(9)
+    )
+    val name = matchData.group(13)
+    new StaticVariable(namespace, body, name, parent)
   }
 }
 
-private[scope] class StaticVariable(body: String, name: String, parent: Scope)
-  extends Variable(body, name, parent)
+private[scope] class StaticVariable(
+  namespace: Namespace, body: String, name: String, parent: Scope
+) extends ClassVariable(namespace, body, name, parent)
 {
   override protected[this] val scopeType = "StaticVariable"
-  override def qualifiedName = "%s.%s".format(parent.qualifiedName, name)
+  override def qualifiedName = "%s.%s%s".format(
+    parent.qualifiedName, namespace.prefix, name
+  )
 }
