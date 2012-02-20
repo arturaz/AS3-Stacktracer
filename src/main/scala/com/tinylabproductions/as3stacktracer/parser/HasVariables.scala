@@ -10,29 +10,26 @@ import com.tinylabproductions.as3stacktracer.parser.Scope
  * To change this template use File | Settings | File Templates.
  */
 
-private[scope] trait HasVariables { self: Scope =>
-  protected[this] var _variables = Set.empty[String]
-  private[scope] def variables = _variables
-
-  private[scope] def addVariable(variable: String) {
-    _variables = _variables + variable
-  }
-  protected[this] def variablesString: String = {
-    // Get variables from parent
-    val variables = parent match {
-      case None => _variables
-      case Some(p) => p match {
-        case clazz: Class => _variables ++ clazz.variables
-        case _ => _variables
-      }
-    }
-    
-    if (variables.isEmpty)
+private[scope] object HasVariables {
+  def toString(vars: Traversable[Variable]): String = {
+    if (vars.isEmpty)
       "null"
     else
       "{%s}".format(
-        variables.map { name => """"%s": %s""".format(name, name) }.
-          mkString(", ")
+        vars.map { variable =>
+          val name = variable.qualifiedName
+          """"%s": %s""".format(name, name)
+        }.mkString(", ")
       )
   }
+}
+
+private[scope] trait HasVariables { self: Scope =>
+  protected[this] var _variables = Set.empty[Variable]
+  private[scope] def variables = _variables
+
+  private[scope] def addVariable(variable: Variable) {
+    _variables = _variables + variable
+  }
+  protected def variablesString: String = HasVariables.toString(_variables)
 }

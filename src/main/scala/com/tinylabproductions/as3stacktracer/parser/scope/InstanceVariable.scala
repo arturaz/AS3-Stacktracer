@@ -23,7 +23,7 @@ private[scope] object InstanceVariable extends Matcher {
   }
 }
 
-class InstanceVariable(body: String, name: String, parent: Scope)
+private[scope] class InstanceVariable(body: String, name: String, parent: Scope)
   extends Variable(body, name, parent)
 {
   protected[this] val scopeType = "InstanceVariable"

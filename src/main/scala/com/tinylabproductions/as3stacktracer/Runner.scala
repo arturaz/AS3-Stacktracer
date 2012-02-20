@@ -15,14 +15,19 @@ import scalax.io._
 object Runner {
   def main(args: Array[String]) {
     args.foreach { filename =>
-      println("processing %s".format(filename))
       val file = new File(filename)
-      val input: Input = Resource.fromFile(file)
-
-      val transformed = AS3.convert(filename, input.chars(Codec.UTF8))
-
-      val output: Output = Resource.fromFile(file)
-      output.write(transformed)(Codec.UTF8)
+      if (file.exists()) {
+        println("Processing: %s".format(filename))
+        val input: Input = Resource.fromFile(file)
+  
+        val transformed = AS3.convert(filename, input.chars(Codec.UTF8))
+  
+        val output: Output = Resource.fromFile(file)
+        output.write(transformed)(Codec.UTF8)
+      }
+      else {
+        println("WARNING: %s does not exist!".format(filename))
+      }
     }
 
     println("Done.")

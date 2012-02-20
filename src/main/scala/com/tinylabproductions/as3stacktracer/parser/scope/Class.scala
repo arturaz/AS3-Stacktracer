@@ -12,6 +12,9 @@ import com.tinylabproductions.as3stacktracer.parser.Scope
  */
 
 private[scope] object Class extends Matcher {
+  protected[scope] val SVarsMethodName = "__st_static_vars__"
+  protected[scope] val IVarsMethodName = "__st_instance_vars__"
+
   protected[this] val matcher =
     """(?x)
     class
@@ -43,7 +46,47 @@ private[scope] class Class(body: String, name: String, parent: Scope)
   protected[this] val scopeType = "Class"
   def qualifiedName = name
 
-  protected val matchers = List(StaticVariable, InstanceVariable, Function)
+  protected val matchers = List(
+    StaticVariable, InstanceVariable, StaticFunction, InstanceFunction
+  )
 
-  protected[this] def onClose() {}
+  override private[scope] def addVariable(variable: Variable) = variable match {
+    case v: StaticVariable => super.addVariable(v)
+    case v: InstanceVariable => super.addVariable(v)
+    case _ => throw new IllegalArgumentException(
+      "I only support static and instance variables!"
+    )
+  }
+
+  override protected def variablesString = throw new UnsupportedOperationException(
+    "Try variableStrings() instead!"
+  )
+
+  def variableStrings: (String, String) = {
+    val (static, instance) = variables.partition { variable =>
+      variable match {
+        case sv: StaticVariable => true
+        case iv: InstanceVariable => false
+        case v => throw new RuntimeException(
+          "'%s' is not supposed to be here!".format(v)
+        )
+      }
+    }
+
+    (HasVariables.toString(static), HasVariables.toString(static ++ instance))
+  }
+
+  protected[this] def onClose() {
+    val (static, instance) = variableStrings
+
+    addPart("""
+private static function %s(localVars: Object): Object {
+  return StacktraceError.mergeVars(localVars, %s);
+}
+
+private function %s(localVars: Object): Object {
+  return StacktraceError.mergeVars(localVars, %s);
+}
+    """.format(Class.SVarsMethodName, static, Class.IVarsMethodName, instance))
+  }
 }

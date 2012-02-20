@@ -17,12 +17,19 @@ private[scope] abstract class Variable(body: String, name: String, parent: Scope
   addPart(body)
   // Add variable to parent.
   parent match {
-    case hv: HasVariables => hv.addVariable(qualifiedName)
+    case hv: HasVariables => hv.addVariable(this)
     case _ => throw new IllegalArgumentException(
       "Variable (%s) parent scope (%s) does not track variables!".format(
         this, parent
       )
     )
+  }
+
+  override def hashCode() = qualifiedName.hashCode()
+
+  override def equals(other: Any) = other match {
+    case v: Variable => qualifiedName == v.qualifiedName
+    case _ => false
   }
 
   protected[this] val matchers = List.empty

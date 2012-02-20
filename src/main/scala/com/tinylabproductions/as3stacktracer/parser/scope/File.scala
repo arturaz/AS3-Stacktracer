@@ -23,5 +23,5 @@ private[parser] class File(name: String) extends Scope(name, None) {
     }
   }
 
-  protected val matchers = List(Package, Class, Function)
+  protected val matchers = List(Package, Class, LocalFunction)
 }

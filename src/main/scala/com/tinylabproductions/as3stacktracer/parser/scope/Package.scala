@@ -38,7 +38,7 @@ private[scope] class Package(body: String, name: String, parent: Scope)
   protected[this] val scopeType = "Package"
   def qualifiedName = "pkg:" + name
 
-  protected val matchers = List(Class, Function)
+  protected val matchers = List(Class, LocalFunction)
 
   protected[this] def onClose() {}
 }
