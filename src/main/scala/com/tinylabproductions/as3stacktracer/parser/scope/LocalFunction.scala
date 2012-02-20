@@ -17,18 +17,19 @@ private[scope] object LocalFunction extends Matcher {
   protected[this] def createScope(
     matchData: MatchData, parent: Scope
   ) = AbstractFunction.createScope(matchData, parent) {
-    case (functionScope, argList, body, name, parent) =>
-      new LocalFunction(functionScope, argList, body, name, parent)
+    case (functionScope, argList, returnType, body, name, parent) =>
+      new LocalFunction(functionScope, argList, returnType, body, name, parent)
   }
 }
 
 private[scope] class LocalFunction(
   functionScope: Option[String],
   argList: String,
+  returnType: Type,
   body: String,
   name: String,
   parent: Scope
-) extends AbstractFunction(functionScope, argList, body, name, parent)
+) extends AbstractFunction(functionScope, argList, returnType, body, name, parent)
 {
   protected[this] val scopeType = "LocalFunction"
 }

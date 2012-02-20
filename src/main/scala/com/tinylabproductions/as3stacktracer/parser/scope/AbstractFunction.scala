@@ -24,14 +24,19 @@ private[scope] object AbstractFunction {
     ([a-zA-Z_][\w]*)? # functions might not have a name
     (\s|\n)* # whitespace
     \((.*?)\) # arg list, may contain newlines
-    .*? # type info
+    (\s|\n)* # whitespace
+    (
+      : # type info
+      (\s|\n)* # whitespace
+      ([a-zA-Z_\*][\w]*) # function return type
+    )?
     (\s|\n)* # whitespace
     \{""".r
   
   private[scope] def createScope[T >: AbstractFunction](
     matchData: MatchData, parent: Scope
   )(
-    create: (Option[String], String, String, String, Scope) => T
+    create: (Option[String], String, Type, String, String, Scope) => T
   ): T = {
     val functionScope = matchData.group(7) match {
       case null => None
@@ -44,7 +49,12 @@ private[scope] object AbstractFunction {
     }
     val body = matchData.group(0)
     val argList = matchData.group(11)
-    create(functionScope, argList, body, name, parent)
+    val returnType = createReturnType(matchData.group(15))
+    create(functionScope, argList, returnType, body, name, parent)
+  }
+  private[scope] def createReturnType(signature: String) = signature match {
+    case null => Void
+    case s: String => Type.create(s)
   }
 
   private[AbstractFunction] val ArgMatcher = """(?x)
@@ -59,12 +69,14 @@ private[scope] object AbstractFunction {
 private[scope] abstract class AbstractFunction(
   functionScope: Option[String],
   argList: String,
+  returnType: Type,
   body: String,
   name: String,
   parent: Scope
 ) extends Block(body, name, parent) with CurlyBlock with HasVariables {
-  protected val matchers = List(LocalVariable, LocalFunction)
   addPart(" try {")
+
+  protected val matchers = List(LocalVariable, LocalFunction)
 
   // Add arguments.
   AbstractFunction.ArgMatcher.findAllIn(argList).matchData.foreach { matchData =>
@@ -84,8 +96,8 @@ private[scope] abstract class AbstractFunction(
 
   protected def onClose() {
     addPart(
-      """} catch (e: Error) { throw StacktraceError.trace(e, "%s", %s); } """.
-        format(fullName, variablesString)
+      """} catch (e: Error) { throw StacktraceError.trace(e, "%s", %s); } %s """.
+        format(fullName, variablesString, returnType.returnValue)
     )
   }
 }

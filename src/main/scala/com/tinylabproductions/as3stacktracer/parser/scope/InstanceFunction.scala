@@ -17,22 +17,23 @@ private[scope] object InstanceFunction extends Matcher {
   protected[this] def createScope(
     matchData: MatchData, parent: Scope
   ) = AbstractFunction.createScope(matchData, parent) {
-    case (functionScope, argList, body, name, parent) =>
-      new InstanceFunction(functionScope, argList, body, name, parent)
+    case (functionScope, argList, returnType, body, name, parent) =>
+      new InstanceFunction(functionScope, argList, returnType, body, name, parent)
   }
 }
 
 private[scope] class InstanceFunction(
   functionScope: Option[String],
   argList: String,
+  returnType: Type,
   body: String,
   name: String,
   parent: Scope
-) extends AbstractFunction(functionScope, argList, body, name, parent)
+) extends AbstractFunction(functionScope, argList, returnType, body, name, parent)
 {
-  // Include instance variables if we are in class.
   protected[this] val scopeType = "InstanceFunction"
 
+  // Include instance variables if we are in class.
   override protected def variablesString = parent match {
     case clazz: Class => "%s(%s)".format(Class.IVarsMethodName, super.variablesString)
     case _ => throw new RuntimeException("%s parent is not Class, but %s!".format(

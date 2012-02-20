@@ -23,7 +23,12 @@ private[scope] object StaticFunction extends Matcher {
     ([a-zA-Z_][\w]*) # functions name
     (\s|\n)* # whitespace
     \((.*?)\) # arg list, may contain newlines
-    .*? # type info
+    (\s|\n)* # whitespace
+    (
+      : # type info
+      (\s|\n)* # whitespace
+      ([a-zA-Z_\*][\w]*) # function return type
+    )?
     (\s|\n)* # whitespace
     \{""".r
 
@@ -37,17 +42,20 @@ private[scope] object StaticFunction extends Matcher {
     val name = matchData.group(4)
     val body = matchData.group(0)
     val argList = matchData.group(6)
-    new StaticFunction(functionScope, argList, body, name, parent)
+    val returnType = AbstractFunction.createReturnType(matchData.group(10))
+
+    new StaticFunction(functionScope, argList, returnType, body, name, parent)
   }
 }
 
 private[scope] class StaticFunction(
   functionScope: Option[String],
   argList: String,
+  returnType: Type,
   body: String,
   name: String,
   parent: Scope
-) extends AbstractFunction(functionScope, argList, body, name, parent)
+) extends AbstractFunction(functionScope, argList, returnType, body, name, parent)
 {
   override protected[this] val scopeType = "StaticFunction"
 

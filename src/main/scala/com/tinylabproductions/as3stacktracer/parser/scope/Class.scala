@@ -51,8 +51,7 @@ private[scope] class Class(body: String, name: String, parent: Scope)
   )
 
   override private[scope] def addVariable(variable: Variable) = variable match {
-    case v: StaticVariable => super.addVariable(v)
-    case v: InstanceVariable => super.addVariable(v)
+    case _: StaticVariable | _: InstanceVariable => super.addVariable(variable)
     case _ => throw new IllegalArgumentException(
       "I only support static and instance variables!"
     )
