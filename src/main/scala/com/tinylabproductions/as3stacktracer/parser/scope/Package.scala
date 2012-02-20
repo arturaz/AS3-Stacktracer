@@ -13,7 +13,12 @@ import com.tinylabproductions.as3stacktracer.parser.Scope
 
 private[scope] object Package extends Matcher {
   protected[this] val matcher =
-    """package(\s|\n)+([a-zA-Z_][\w\.]*)?(\s|\n)*\{""".r
+    """(?x)
+    package
+    (\s|\n)+
+    ([a-zA-Z_][\w\.]*)?
+    (\s|\n)*
+    \{""".r
 
   private[scope] val ImportStatement =
     "\nimport com.tinylabproductions.stacktracer.StacktraceError;\n"
@@ -26,7 +31,7 @@ private[scope] object Package extends Matcher {
       case s: String => s
     }
     val body = matchData.group(0)
-    new Package(body, name, parent)
+    Some(new Package(body, name, parent))
   }
 }
 
@@ -38,7 +43,7 @@ private[scope] class Package(body: String, name: String, parent: Scope)
   protected[this] val scopeType = "Package"
   def qualifiedName = "pkg:" + name
 
-  protected val matchers = List(Class, LocalFunction)
+  protected val matchers = List(Comment, Class, LocalFunction)
 
   protected[this] def onClose() {}
 }

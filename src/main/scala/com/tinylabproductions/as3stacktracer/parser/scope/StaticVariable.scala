@@ -39,7 +39,7 @@ private[scope] object StaticVariable extends Matcher {
       matchData.group(3), matchData.group(9)
     )
     val name = matchData.group(13)
-    new StaticVariable(namespace, body, name, parent)
+    Some(new StaticVariable(namespace, body, name, parent))
   }
 }
 

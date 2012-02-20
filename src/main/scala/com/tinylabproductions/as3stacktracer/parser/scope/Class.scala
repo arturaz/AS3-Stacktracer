@@ -30,7 +30,7 @@ private[scope] object Class extends Matcher {
   ) = {
     val body = matchData.group(0)
     val name = matchData.group(2)
-    new Class(body, name, parent)
+    Some(new Class(body, name, parent))
   }
 }
 
@@ -38,7 +38,7 @@ private[scope] class Class(body: String, name: String, parent: Scope)
   extends Block(name, parent) with CurlyBlock with HasVariables
 {
   parent match {
-    case f: File => f.addNonPackageImport()
+    case f: File.AsFile => f.addNonPackageImport()
     case _ => ()
   }
   addPart("%s // %s\n".format(body, fullName))
@@ -47,7 +47,8 @@ private[scope] class Class(body: String, name: String, parent: Scope)
   def qualifiedName = name
 
   protected val matchers = List(
-    StaticVariable, InstanceVariable, StaticFunction, InstanceFunction
+    Comment, StaticVariable, InstanceVariable,
+    StaticFunction, InstanceFunction, LocalFunction
   )
 
   override private[scope] def addVariable(variable: Variable) = variable match {

@@ -1,6 +1,5 @@
 package com.tinylabproductions.as3stacktracer.parser
 
-import annotation.tailrec
 import scope.File
 
 /**
@@ -20,11 +19,18 @@ object AS3 {
 }
 
 class AS3(filename: String) {
-  private[this] var scope: Scope = new File(filename)
+  private[this] var scope: Scope = File(filename)
 
   def parse(input: Traversable[Char]) = {
     input.foreach { char =>
       scope = scope.append(char)
+    }
+
+    // Finalize parsing
+    var previous: Scope = null
+    while (previous != scope) {
+      previous = scope
+      scope = scope.finished()
     }
   }
 

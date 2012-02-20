@@ -17,7 +17,8 @@ object AS3StacktracerBuild extends Build {
     settings = Project.defaultSettings ++ assemblySettings ++ Seq(
       libraryDependencies := Seq(
         "com.github.scala-incubator.io" %% "scala-io-core" % "0.3.0",
-        "com.github.scala-incubator.io" %% "scala-io-file" % "0.3.0"
+        "com.github.scala-incubator.io" %% "scala-io-file" % "0.3.0",
+        "org.streum" %% "configrity-core" % "0.10.0"
       )
     )
   )

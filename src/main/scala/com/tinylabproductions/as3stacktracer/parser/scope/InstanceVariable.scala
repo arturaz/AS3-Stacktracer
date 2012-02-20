@@ -25,11 +25,11 @@ private[scope] object InstanceVariable extends Matcher {
 
   override protected[this] def createScope(
     matchData: MatchData, parent: Scope
-  ): Scope = {
+  ) = {
     val body = matchData.group(0)
     val namespace = ClassVariable.createNamespace(matchData.group(1))
     val name = matchData.group(5)
-    new InstanceVariable(namespace, body, name, parent)
+    Some(new InstanceVariable(namespace, body, name, parent))
   }
 }
 

@@ -19,17 +19,21 @@ private[parser] trait Matcher {
     matcher.findFirstMatchIn(buffer) match {
       case None => Matcher.Failure
       case Some(matchData) =>
-        val matched = matchData.group(0)
-        Matcher.Success(
-          buffer.substring(0, buffer.length() - matched.length()),
-          createScope(matchData, parent)
-        )
+        createScope(matchData, parent) match {
+          case None => Matcher.Failure
+          case Some(scope) =>
+            val matched = matchData.group(0)
+            Matcher.Success(
+              buffer.substring(0, buffer.length() - matched.length()),
+              scope
+            )
+        }
     }
   }
 
   protected[this] def createScope(
     matchData: MatchData, parent: Scope
-  ): Scope
+  ): Option[Scope]
 }
 
 private[parser] object Matcher {

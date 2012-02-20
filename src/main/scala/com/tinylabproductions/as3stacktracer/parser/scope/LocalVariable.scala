@@ -22,11 +22,10 @@ private[scope] object LocalVariable extends Matcher {
                  # full var name
     """.r
 
-  protected[this] def createScope(matchData: MatchData, parent: Scope): Scope =
-  {
+  protected[this] def createScope(matchData: MatchData, parent: Scope) = {
     val body = matchData.group(0)
     val name = matchData.group(3)
-    new LocalVariable(body, name, parent)
+    Some(new LocalVariable(body, name, parent))
   }
 }
 

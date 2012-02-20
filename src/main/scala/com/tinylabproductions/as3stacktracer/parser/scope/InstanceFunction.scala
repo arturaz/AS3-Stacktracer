@@ -18,7 +18,13 @@ private[scope] object InstanceFunction extends Matcher {
     matchData: MatchData, parent: Scope
   ) = AbstractFunction.createScope(matchData, parent) {
     case (functionScope, argList, returnType, body, name, parent) =>
-      new InstanceFunction(functionScope, argList, returnType, body, name, parent)
+      name match {
+        case None => None // Anonymous functions cannot be instance functions.
+        case Some(n) =>
+          Some(new InstanceFunction(
+            functionScope, argList, returnType, body, name.get, parent
+          ))
+      }
   }
 }
 
@@ -29,8 +35,9 @@ private[scope] class InstanceFunction(
   body: String,
   name: String,
   parent: Scope
-) extends AbstractFunction(functionScope, argList, returnType, body, name, parent)
-{
+) extends AbstractFunction(
+  functionScope, argList, returnType, body, Some(name), parent
+) {
   protected[this] val scopeType = "InstanceFunction"
 
   // Include instance variables if we are in class.

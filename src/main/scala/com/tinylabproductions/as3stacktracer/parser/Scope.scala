@@ -21,6 +21,7 @@ private[parser] abstract class Scope(
   private[this] var _parts = List.empty[Either[String, Scope]]
   def parts = _parts
   
+  protected[this] def addPart(c: Char) { _parts = parts :+ Left(c.toString) }
   protected[this] def addPart(s: String) { _parts = parts :+ Left(s) }
   protected[this] def addPart(s: Scope) { _parts = parts :+ Right(s) }
 
@@ -38,9 +39,17 @@ private[parser] abstract class Scope(
     }
   }
 
-  protected def clearBuffer() {
+  private[parser] def clearBuffer() {
     addPart(buffer.toString())
     buffer.clear()
+  }
+
+  private[parser] def finished(): Scope = {
+    clearBuffer()
+    parent match {
+      case Some(parent) => parent
+      case None => this
+    }
   }
 
   private[this] def tryToMatch(): Option[Scope] = {

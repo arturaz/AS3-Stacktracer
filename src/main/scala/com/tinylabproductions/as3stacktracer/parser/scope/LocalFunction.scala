@@ -18,7 +18,7 @@ private[scope] object LocalFunction extends Matcher {
     matchData: MatchData, parent: Scope
   ) = AbstractFunction.createScope(matchData, parent) {
     case (functionScope, argList, returnType, body, name, parent) =>
-      new LocalFunction(functionScope, argList, returnType, body, name, parent)
+      Some(new LocalFunction(functionScope, argList, returnType, body, name, parent))
   }
 }
 
@@ -27,7 +27,7 @@ private[scope] class LocalFunction(
   argList: String,
   returnType: Type,
   body: String,
-  name: String,
+  name: Option[String],
   parent: Scope
 ) extends AbstractFunction(functionScope, argList, returnType, body, name, parent)
 {

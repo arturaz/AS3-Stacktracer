@@ -12,6 +12,8 @@ import util.matching.Regex.MatchData
  */
 
 private[scope] object AbstractFunction {
+  private[AbstractFunction] val Anonymous = "_anon_"
+
   private[scope] val Matcher =
     """(?xs)
     (
@@ -19,7 +21,7 @@ private[scope] object AbstractFunction {
     )? # anonymous functions assigned with var a = function
     function
     (\s|\n)* # whitespace
-    (get|set)? # getter/setter support
+    (get\b|set\b)? # getter/setter support, \b ensures we don't match getFoo()
     (\s|\n)* # whitespace
     ([a-zA-Z_][\w]*)? # functions might not have a name
     (\s|\n)* # whitespace
@@ -28,7 +30,7 @@ private[scope] object AbstractFunction {
     (
       : # type info
       (\s|\n)* # whitespace
-      ([a-zA-Z_\*][\w]*) # function return type
+      ([a-zA-Z_\*][\w\.<>]*) # function return type
     )?
     (\s|\n)* # whitespace
     \{""".r
@@ -36,16 +38,20 @@ private[scope] object AbstractFunction {
   private[scope] def createScope[T >: AbstractFunction](
     matchData: MatchData, parent: Scope
   )(
-    create: (Option[String], String, Type, String, String, Scope) => T
-  ): T = {
+    create: (Option[String], String, Type, String, Option[String], Scope) =>
+      Option[T]
+  ): Option[T] = {
     val functionScope = matchData.group(7) match {
       case null => None
       case s: String => Some(s)
     }
 
     val name = matchData.group(9) match {
-      case null => matchData.group(4) // Anonymous function via var.
-      case s: String => s // Named function.
+      case null => matchData.group(4) match {
+        case null => None // Truly anonymous function.
+        case s: String => Some(s)  // Anonymous function via var.
+      }
+      case s: String => Some(s) // Named function.
     }
     val body = matchData.group(0)
     val argList = matchData.group(11)
@@ -72,12 +78,14 @@ private[scope] abstract class AbstractFunction(
   argList: String,
   returnType: Type,
   body: String,
-  name: String,
+  name: Option[String],
   parent: Scope
-) extends Block(body, name, parent) with CurlyBlock with HasVariables {
+) extends Block(body, name.getOrElse(AbstractFunction.Anonymous), parent)
+  with CurlyBlock with HasVariables
+{
   addPart(" try {")
 
-  protected val matchers = List(LocalVariable, LocalFunction)
+  protected val matchers = List(Comment, LocalVariable, LocalFunction)
 
   // Add arguments.
   AbstractFunction.ArgMatcher.findAllIn(argList).matchData.foreach { matchData =>
@@ -92,7 +100,7 @@ private[scope] abstract class AbstractFunction(
       case Some(s) => "%s:".format(s)
       case None => ""
     },
-    name
+    name.getOrElse(AbstractFunction.Anonymous)
   )
 
   protected def onClose() {

@@ -12,9 +12,8 @@ import com.tinylabproductions.as3stacktracer.parser.Scope
  */
 
 private[scope] abstract class Variable(body: String, name: String, parent: Scope)
-  extends Scope(name, Some(parent))
+  extends Literal(body, name, parent)
 {
-  addPart(body)
   // Add variable to parent.
   parent match {
     case hv: HasVariables => hv.addVariable(this)
@@ -30,13 +29,5 @@ private[scope] abstract class Variable(body: String, name: String, parent: Scope
   override def equals(other: Any) = other match {
     case v: Variable => qualifiedName == v.qualifiedName
     case _ => false
-  }
-
-  protected[this] val matchers = List.empty
-
-  // Exit this scope on first character.
-  override def append(char: Char) = {
-    parent.append(char)
-    parent
   }
 }
