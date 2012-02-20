@@ -69,7 +69,9 @@ Usage:
 
     def shouldSkip(path: String) = {
       skippedFiles.exists { reStr =>
-        reStr.r.findFirstIn(path).isDefined
+        val re = reStr.r
+        //println("%s ~ %s".format(path, re))
+        re.findFirstIn(path).isDefined
       }
     }
     
@@ -88,9 +90,11 @@ Usage:
             benchmark("Skipping (copying): %s".format(srcRel))
               { () => copy(src, dst) }
           }
-          benchmark("Processing: %s".format(srcRel)) { () =>
-            dst.parent.map { _.createDirectory(failIfExists = false) }
-            convert(src, srcRel, dst)
+          else {
+            benchmark("Processing: %s".format(srcRel)) { () =>
+              dst.parent.map { _.createDirectory(failIfExists = false) }
+              convert(src, srcRel, dst)
+            }
           }
         }
         else {
