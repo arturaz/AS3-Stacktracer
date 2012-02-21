@@ -13,6 +13,7 @@ import util.matching.Regex.MatchData
 
 private[scope] object AbstractFunction {
   private[AbstractFunction] val Anonymous = "_anon_"
+  private[AbstractFunction] val ExceptionName = "___st_e"
 
   private[scope] val Matcher =
     """(?xs)
@@ -105,8 +106,11 @@ private[scope] abstract class AbstractFunction(
 
   protected def onClose() {
     addPart(
-      """} catch (e: Error) { throw StacktraceError.trace(e, "%s", %s); } %s """.
-        format(fullName, variablesString, returnType.returnValue)
+      """} catch (%s: Error) { throw StacktraceError.trace(%s, "%s", %s); } %s """.
+        format(
+          AbstractFunction.ExceptionName, AbstractFunction.ExceptionName,
+          fullName, variablesString, returnType.returnValue
+        )
     )
   }
 }
