@@ -15,6 +15,8 @@ import org.streum.configrity.Configuration
  */
 
 object Runner {
+  private[this] val WinDS = '\\'
+  private[this] val UnixDS = '/'
   private[this] val / = System.getProperty("file.separator")
   private[this] val ConfigName = "as3stacktracer.conf"
 
@@ -30,6 +32,7 @@ object Runner {
   }
   // Always force processing.
   private[this] val force = config[Boolean]("force", false)
+  private[this] val verbose = config[Boolean]("verbose", false)
 
   def main(args: Array[String]) {
     if (args.size == 2) {
@@ -70,44 +73,77 @@ Usage:
     def shouldSkip(path: String) = {
       skippedFiles.exists { reStr =>
         val re = reStr.r
+        // Change path separator, because in config we use unix separators.
+        val processed = path.replace(WinDS, UnixDS)
         //println("%s ~ %s".format(path, re))
-        re.findFirstIn(path).isDefined
+        re.findFirstIn(processed).isDefined
       }
     }
     
     def copy(src: Path, dst: Path) {
       dst.openOutput(out => src.copyDataTo(out))
     }
-
-    def process(src: Path) {
+    
+    def paths(src: Path) = {
       val srcAbs = src.toAbsolute.path
       val srcRel = srcAbs.replace(srcDirAbs, "")
       val dst = dstDir resolve srcRel
       
-      if (needsUpdate(src, dst)) {
-        if (srcAbs.endsWith(".as") || srcAbs.endsWith(".mxml")) {
-          if (shouldSkip(srcRel)) {
-            benchmark("Skipping (copying): %s".format(srcRel))
-              { () => copy(src, dst) }
-          }
-          else {
-            benchmark("Processing: %s".format(srcRel)) { () =>
-              dst.parent.map { _.createDirectory(failIfExists = false) }
-              convert(src, srcRel, dst)
-            }
-          }
+      (srcAbs, srcRel, dst)
+    }
+
+    def process(src: Path) {
+      val (srcAbs, srcRel, dst) = paths(src)
+      
+      if (srcAbs.endsWith(".as") || srcAbs.endsWith(".mxml")) {
+        if (shouldSkip(srcRel)) {
+          run('s', "Skipping (copying): %s".format(srcRel))
+            { () => copy(src, dst) }
         }
         else {
-          benchmark("Copying: %s".format(srcRel)) { () => copy(src, dst) }
+          run('p', "Processing: %s".format(srcRel)) { () =>
+            dst.parent.map { _.createDirectory(failIfExists = false) }
+            convert(src, srcRel, dst)
+          }
         }
       }
       else {
-        println("Skipping: %s (same modification time)".format(srcRel))
+        run('c', "Copying: %s".format(srcRel)) { () => copy(src, dst) }
       }
     }
 
-    srcDir.descendants().par.foreach { file =>
-      if (! file.isDirectory) process(file)
+    cleanup(dstDir, srcDir)
+
+    srcDir.descendants().filter { src =>
+      // Filter files that don't need updating to try to ensure that both threads
+      // get equal work.
+      val (srcAbs, srcRel, dst) = paths(src)
+
+      if (src.isDirectory) false
+      else if (needsUpdate(src, dst)) true
+      else {
+        report('.', "Skipping: %s (same modification time)".format(srcRel))
+        false
+      }
+    }.par.foreach { file => process(file) }
+  }
+
+  private[this] def cleanup(dstDir: Path, srcDir: Path) {
+    if (dstDir.exists) {
+      val dstAbsDir = dstDir.toAbsolute.path + /
+
+      dstDir.descendants().par.foreach { file =>
+        val dstAbsFile = file.toAbsolute.path
+        val dstRelFile = dstAbsFile.replace(dstAbsDir, "")
+
+        val srcFile = srcDir resolve dstRelFile
+        if (! srcFile.exists) {
+          println("Removing %s which does not exist in %s".format(
+            file.path, srcDir.path
+          ))
+          file.deleteRecursively(force = true)
+        }
+      }
     }
   }
   
@@ -117,9 +153,8 @@ Usage:
     filenames.foreach { filename =>
       val file = Path.fromString(filename)
       if (file.exists) {
-        benchmark("Processing: %s".format(filename)) { () =>
-          convert(file, filename, file)
-        }
+        run('p', "Processing: %s".format(filename))
+          { () => convert(file, filename, file) }
       }
       else {
         println("WARNING: %s does not exist!".format(filename))
@@ -129,18 +164,28 @@ Usage:
   
   private[this] def convert(src: Path, relSrcName: String, dst: Path) {
     val srcLastMod = src.lastModified // In case src == dst
-    val transformed = AS3.convert(relSrcName, src.chars(Codec.UTF8))
+    val unixifiedName = relSrcName.replace(WinDS, UnixDS)
+    val transformed = AS3.convert(unixifiedName, src.chars(Codec.UTF8))
     dst.deleteIfExists()
     dst.write(transformed)(Codec.UTF8)
     dst.lastModified = srcLastMod
   }
   
-  private[this] def benchmark[T](msg: String)(func: () => T): T = {
-    val start = System.currentTimeMillis()
+  private[this] def run[T](short: => Char, long: => String)(func: () => T): T = {
+    if (verbose)
+      println(long)
     val res = func()
-    val end = System.currentTimeMillis()
-    println("%s (%3.2fs)".format(msg, (end - start).toFloat / 1000))
+    if (! verbose)
+      print(short)
+
     res
+  }
+
+  private[this] def report(short: => Char, long: => String) {
+    if (verbose)
+      println(long)
+    else
+      print(short)
   }
 
   private[this] def needsUpdate(src: Path, dst: Path): Boolean = {

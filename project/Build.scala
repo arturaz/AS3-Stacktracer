@@ -19,7 +19,8 @@ object AS3StacktracerBuild extends Build {
         "com.github.scala-incubator.io" %% "scala-io-core" % "0.3.0",
         "com.github.scala-incubator.io" %% "scala-io-file" % "0.3.0",
         "org.streum" %% "configrity-core" % "0.10.0"
-      )
+      ),
+      jarName := "as3_st.jar"
     )
   )
 }
