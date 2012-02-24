@@ -1,4 +1,5 @@
 package com.tinylabproductions.stacktracer {
+   import flash.system.Capabilities;
    import flash.utils.getQualifiedClassName;
 
    public class StacktraceError extends Error {
@@ -32,6 +33,12 @@ package com.tinylabproductions.stacktracer {
       }
       
       public function generateStacktrace(showVars: Boolean): String {
+         if (! showVars && Capabilities.isDebugger) {
+            // Return debugger stacktrace, because it is more accurate and
+            // we don't need variables anyway.
+            return cause.getStackTrace()
+         }
+
          var msg: String = "";
          
          var length: uint = stacktrace.length;
