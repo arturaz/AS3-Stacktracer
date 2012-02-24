@@ -6,7 +6,7 @@ players.
 
 # Compiling
 
-Get SBT <http://www.scala-sbt.org/>, enter this directory and launch `sbt assembly`.
+Get SBT from <http://www.scala-sbt.org/>, enter this directory and launch `sbt assembly`.
 Having JDK is required. Result will be in `target/as3_st.jar`.
 
 # Running
@@ -72,7 +72,7 @@ Java regexp modifier flags (i.e. "(?i)foo") can be used here.
 
 # Author
 
-Artūras Šlajus <arturas.slajus@gmail.com>
+Artūras Šlajus (<arturas.slajus@gmail.com>)
 
 # License
 
