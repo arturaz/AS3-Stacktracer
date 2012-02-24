@@ -25,17 +25,17 @@ This tool supports .as and .mxml files.
 
 When running, it outputs one character for each file:
 
-* *p* - file has been preprocessed.
-* *.* - no update needed.
-* *c* - file type not supported, file is copied instead.
-* *s* - file preprocessing was skipped, file is copied instead.
+* `p` - file has been preprocessed.
+* `.` - no update needed.
+* `c` - file type not supported, file is copied instead.
+* `s` - file preprocessing was skipped, file is copied instead.
 
-To compile your precompiled source you will need to include files from *as3*
+To compile your precompiled source you will need to include files from `as3`
 directory into your project. You may modify them to suit your project needs.
 
 # Configuration
 
-Configuration is placed in *as3stacktracer.conf* file in working directory.
+Configuration is placed in `as3stacktracer.conf` file in working directory.
 
 Example configuration:
 
@@ -49,13 +49,13 @@ Example configuration:
       "^assets/.+?\.as$"
     ]
 
-* *force* - precompile files even if we can't detect any change in them.
-* *verbose* - show full messages instead of symbols.
-* *skipped* - array of regexps which files should not be preprocessed.
+* `force` - precompile files even if we can't detect any change in them.
+* `verbose` - show full messages instead of symbols.
+* `skipped` - array of regexps which files should not be preprocessed.
 Windows dir separators are converted to unix, so always use / here.
 Java regexp modifier flags (i.e. "(?i)foo") can be used here.
 
-# Features missing/not supported
+# Features missing / not supported
 
 * No line numbers in stacktraces yet. This would be most welcome patch.
 * Cannot have comments between package/class/function declaration and body.
