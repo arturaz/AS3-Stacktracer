@@ -60,15 +60,15 @@ Java regexp modifier flags (i.e. "(?i)foo") can be used here.
 * No line numbers in stacktraces yet. This would be most welcome patch.
 * Cannot have comments between package/class/function declaration and body.
 
-    package foo 
-    // This is not supported
-    {
-      ...
-    }
+        package foo 
+        // This is not supported
+        {
+          ...
+        }
 
 * Variables declared without var are not tracked.
 
-    var a: String, b: String; // b will not be tracked.
+        var a: String, b: String; // b will not be tracked.
 
 # Author
 
