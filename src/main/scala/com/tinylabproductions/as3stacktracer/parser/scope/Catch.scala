@@ -68,7 +68,7 @@ private[scope] class Catch(
   protected[this] val scopeType = "Catch"
   def qualifiedName = name
 
-  protected val matchers = List.empty
+  protected val matchers = List(Comment, LocalFunction)
 
   protected[this] def onClose() {
     addPart(ClosingChar)
