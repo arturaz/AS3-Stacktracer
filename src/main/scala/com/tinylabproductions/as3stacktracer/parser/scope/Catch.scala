@@ -56,7 +56,7 @@ private[scope] class Catch(
     addPart(
       """catch(#catched: Error) {
   var #unwrapped: Error = (#catched is StacktraceError) ? (#catched as StacktraceError).cause : #catched;
-  if (! (#unwrapped is TypeError)) throw #catched;
+  if (! (#unwrapped is #errorType)) throw #catched;
   else
     // This is needed because variable '#errorName' might have a collision with
     // another var somewhere, however this rule does not exist in catch clause.
