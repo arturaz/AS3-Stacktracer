@@ -64,7 +64,8 @@ private[scope] class StaticFunction(
 
   // Include static variables if we're in class.
   override protected def variablesString = parent match {
-    case clazz: Class => "%s(%s)".format(Class.SVarsMethodName, super.variablesString)
+    case clazz: Class =>
+      HasVariables.toClassString(super.variablesString)
     case _ => throw new RuntimeException("%s parent is not Class, but %s!".format(
       this, parent
     ))

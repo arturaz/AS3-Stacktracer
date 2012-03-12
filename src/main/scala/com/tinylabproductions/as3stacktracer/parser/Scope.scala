@@ -1,7 +1,6 @@
 package com.tinylabproductions.as3stacktracer.parser
 
 import scope.Matcher
-import util.matching.Regex.MatchData
 
 /**
  * Created by IntelliJ IDEA.
@@ -12,8 +11,8 @@ import util.matching.Regex.MatchData
  */
 
 private[parser] abstract class Scope(
-  name: String,
-  protected[this] val parent: Option[Scope]
+  val name: String,
+  val parent: Option[Scope]
 ) {
   protected[this] val matchers: List[Matcher]
   protected[this] val scopeType: String

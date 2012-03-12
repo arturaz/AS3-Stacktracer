@@ -12,8 +12,7 @@ import com.tinylabproductions.as3stacktracer.parser.Scope
  */
 
 private[scope] object Class extends Matcher {
-  protected[scope] val SVarsMethodName = "__st_static_vars__"
-  protected[scope] val IVarsMethodName = "__st_instance_vars__"
+  protected[scope] val VarsMethodName = "__st_vars__"
 
   protected[this] val matcher =
     """(?x)
@@ -62,7 +61,7 @@ private[scope] class Class(body: String, name: String, parent: Scope)
     "Try variableStrings() instead!"
   )
 
-  def variableStrings: (String, String) = {
+  private[this] def variableStrings: (String, String) = {
     val (static, instance) = variables.partition { variable =>
       variable match {
         case sv: StaticVariable => true
@@ -79,6 +78,8 @@ private[scope] class Class(body: String, name: String, parent: Scope)
   protected[this] def onClose() {
     val (static, instance) = variableStrings
 
+    // Both instance/static method have same name: mxmlc can distinguish which one to
+    // use in a function.
     addPart("""
 private static function %s(localVars: Object): Object {
   return StacktraceError.mergeVars(localVars, %s);
@@ -87,6 +88,9 @@ private static function %s(localVars: Object): Object {
 private function %s(localVars: Object): Object {
   return StacktraceError.mergeVars(localVars, %s);
 }
-    """.format(Class.SVarsMethodName, static, Class.IVarsMethodName, instance))
+    """.format(
+      Class.VarsMethodName, static,
+      Class.VarsMethodName, instance
+    ))
   }
 }

@@ -42,7 +42,8 @@ private[scope] class InstanceFunction(
 
   // Include instance variables if we are in class.
   override protected def variablesString = parent match {
-    case clazz: Class => "%s(%s)".format(Class.IVarsMethodName, super.variablesString)
+    case clazz: Class =>
+      HasVariables.toClassString(super.variablesString)
     case _ => throw new RuntimeException("%s parent is not Class, but %s!".format(
       this, parent
     ))

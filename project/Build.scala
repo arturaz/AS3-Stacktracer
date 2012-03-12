@@ -15,10 +15,18 @@ object AS3StacktracerBuild extends Build {
     id = "AS3Stacktracer",
     base = file("."),
     settings = Project.defaultSettings ++ assemblySettings ++ Seq(
+      resolvers := Seq(
+        // scala-enhanched-strings
+        "Virtual-Void repository" at "http://mvn.virtual-void.net"
+      ),
       libraryDependencies := Seq(
         "com.github.scala-incubator.io" %% "scala-io-core" % "0.3.0",
         "com.github.scala-incubator.io" %% "scala-io-file" % "0.3.0",
-        "org.streum" %% "configrity-core" % "0.10.0"
+        "org.streum" %% "configrity-core" % "0.10.0",
+        // String interpolation
+        compilerPlugin(
+          "net.virtualvoid" %% "scala-enhanced-strings" % "0.5.2"
+        )
       ),
       jarName := "as3_st.jar"
     )

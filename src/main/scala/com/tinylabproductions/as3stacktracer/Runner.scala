@@ -47,7 +47,7 @@ object Runner {
     else if (args.size == 0) help()
     else processFiles(args)
     
-    println("Done.")
+    println("\nDone.")
   }
 
   private[this] def help() {

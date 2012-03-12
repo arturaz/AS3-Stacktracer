@@ -11,6 +11,8 @@ import com.tinylabproductions.as3stacktracer.parser.Scope
  */
 
 private[parser] abstract class File(name: String) extends Scope(name, None) {
+  File.resetCatchIndex()
+
   def qualifiedName = name
 }
 
@@ -22,7 +24,15 @@ private[parser] object File {
       "Unsupported file: %s. Supported extensions: as, mxml.".format(filename)
     )
   }
-  
+
+  private[this] var catchIndex = 0
+  private[File] def resetCatchIndex() { catchIndex = 0 }
+  // Returns index number of catch clause in this file.
+  def nextCatchIndex: Int = {
+    catchIndex += 1
+    catchIndex
+  }
+
   class AsFile(name: String) extends File(name) {
     protected[this] val scopeType = "AsFile"
     protected val matchers = List(Comment, Package, Class, LocalFunction)

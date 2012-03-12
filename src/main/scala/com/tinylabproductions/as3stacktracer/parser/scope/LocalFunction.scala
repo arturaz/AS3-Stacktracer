@@ -2,6 +2,7 @@ package com.tinylabproductions.as3stacktracer.parser.scope
 
 import util.matching.Regex.MatchData
 import com.tinylabproductions.as3stacktracer.parser.Scope
+import annotation.tailrec
 
 /**
  * Created by IntelliJ IDEA.
@@ -32,4 +33,22 @@ private[scope] class LocalFunction(
 ) extends AbstractFunction(functionScope, argList, returnType, body, name, parent)
 {
   protected[this] val scopeType = "LocalFunction"
+
+  // Add support for anonymous functions defined in instance/static functions.
+  override protected def variablesString = {
+    @tailrec
+    def traverse(vars: Set[Variable], par: Option[Scope]): String = par match {
+      case Some(i: InstanceFunction) =>
+        HasVariables.toClassString(i.variables ++ vars)
+      case Some(s: StaticFunction) =>
+        HasVariables.toClassString(s.variables ++ vars)
+      case Some(c: Class) =>
+        HasVariables.toClassString(vars)
+      case Some(hv: HasVariables) =>
+        traverse(hv.variables ++ vars, par.get.parent)
+      case _ => super.variablesString
+    }
+    
+    traverse(variables, Some(parent))
+  }
 }

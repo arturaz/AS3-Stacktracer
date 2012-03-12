@@ -3,12 +3,12 @@ package com.tinylabproductions.stacktracer {
    import flash.utils.getQualifiedClassName;
 
    public class StacktraceError extends Error {
-      private var cause: Error;
+      private var _cause: Error;
       private var stacktrace: Vector.<StacktraceEntry> =
          new Vector.<StacktraceEntry>();
       
       public function StacktraceError(cause: Error, entry: StacktraceEntry) {
-         this.cause = cause;
+         this._cause = cause;
          
          message = cause.message;
          name = cause.name;
@@ -16,8 +16,12 @@ package com.tinylabproductions.stacktracer {
          stacktrace.push(entry);
       }
 
+      public function get cause(): Error {
+         return _cause;
+      }
+
       override public function get errorID(): int {
-         return cause.errorID;
+         return _cause.errorID;
       }
 
       override public function getStackTrace(): String {
@@ -36,7 +40,7 @@ package com.tinylabproductions.stacktracer {
          if (! showVars && Capabilities.isDebugger) {
             // Return debugger stacktrace, because it is more accurate and
             // we don't need variables anyway.
-            return cause.getStackTrace()
+            return _cause.getStackTrace()
          }
 
          var msg: String = "";

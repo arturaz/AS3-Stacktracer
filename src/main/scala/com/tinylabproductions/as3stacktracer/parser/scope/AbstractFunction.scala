@@ -86,7 +86,7 @@ private[scope] abstract class AbstractFunction(
 {
   addPart(" try {")
 
-  protected val matchers = List(Comment, LocalVariable, LocalFunction)
+  protected val matchers = List(Comment, Catch, LocalVariable, LocalFunction)
 
   // Add arguments.
   AbstractFunction.ArgMatcher.findAllIn(argList).matchData.foreach { matchData =>

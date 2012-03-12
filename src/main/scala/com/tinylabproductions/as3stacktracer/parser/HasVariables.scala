@@ -22,6 +22,12 @@ private[scope] object HasVariables {
         }.mkString(", ")
       )
   }
+
+  def toClassString(varsString: String): String =
+    "%s(%s)".format(Class.VarsMethodName, varsString)
+
+  def toClassString(vars: Traversable[Variable]): String =
+    toClassString(toString(vars))
 }
 
 private[scope] trait HasVariables { self: Scope =>

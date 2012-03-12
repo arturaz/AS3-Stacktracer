@@ -70,6 +70,31 @@ Java regexp modifier flags (i.e. "(?i)foo") can be used here.
 
         var a: String, b: String; // b will not be tracked.
 
+* Multiple nested try/catch blocks are not supported.
+        
+        // This is not supported.
+        function func1() {
+          try { foo(); }
+          catch (err1: Error) {
+            try { foo2(); }
+            catch (err2: Error) {
+              errorHandling();
+            }
+          }
+        }
+
+        // Recommended workaround is:
+        function func1() {
+          try { foo(); }
+          catch (err1: Error) { func2(); }
+        }
+        function func2() {
+          try { foo2(); }
+          catch (err2: Error) {
+            errorHandling();
+          }
+        }
+
 # Author
 
 Artūras Šlajus (<arturas.slajus@gmail.com>)
