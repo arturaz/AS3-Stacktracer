@@ -47,7 +47,7 @@ private[scope] class Class(body: String, name: String, parent: Scope)
 
   protected val matchers = List(
     Comment, StaticVariable, InstanceVariable,
-    StaticFunction, InstanceFunction, LocalFunction
+    StaticFunction, InstanceFunction, LocalFunction, ASString
   )
 
   override private[scope] def addVariable(variable: Variable) = variable match {

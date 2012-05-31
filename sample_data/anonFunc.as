@@ -1,8 +1,13 @@
 package {
 class Foo {
+
+    var zug: String = "Bitch, \" }}}}}}} please.\\"
+
     private var a: Function = function(): String {
-        var zug: String = "Bitch, please."
+        var zug: String = "Bitch, \" }}}}}}} please.\\"
+		
         function nxnx(c: String) {
+            var zug: String = "Bitch, \" }}}}}}} please.\\"
             return c;
         }
         return zug;

@@ -68,13 +68,13 @@ Usage:
     println("About to process %s -> %s".format(srcDir, dstDir))
     
     val srcDirAbs = srcDir.toAbsolute.path + /
-    val skippedFiles = config[List[String]]("skipped", List.empty)
+    val skippedFiles = config[List[String]]("skipped", List.empty).map(_.r)
 
     def shouldSkip(path: String) = {
-      skippedFiles.exists { reStr =>
-        val re = reStr.r
-        // Change path separator, because in config we use unix separators.
-        val processed = path.replace(WinDS, UnixDS)
+      // Change path separator, because in config we use unix separators.
+      val processed = path.replace(WinDS, UnixDS)
+
+      skippedFiles.exists { re =>
         //println("%s ~ %s".format(path, re))
         re.findFirstIn(processed).isDefined
       }

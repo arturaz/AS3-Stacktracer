@@ -32,7 +32,7 @@ class Script(body: String, parent: Scope) extends Scope("script", Some(parent)) 
   private[this] val bodyBuffer = new StringBuilder
 
   protected[this] val scopeType = "Script"
-  protected[this] val matchers = List(LocalFunction)
+  protected[this] val matchers = List(LocalFunction, ASString)
 
   def qualifiedName = "script"
 
