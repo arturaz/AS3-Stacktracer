@@ -12,6 +12,7 @@ import util.matching.Regex.MatchData
  */
 
 private[scope] object AbstractFunction {
+  private[scope] val LineNumberVarName = "___st_line_num"
   private[AbstractFunction] val Anonymous = "_anon_"
   private[AbstractFunction] val ExceptionName = "___st_e"
 
@@ -82,11 +83,15 @@ private[scope] abstract class AbstractFunction(
   name: Option[String],
   parent: Scope
 ) extends Block(body, name.getOrElse(AbstractFunction.Anonymous), parent)
-  with CurlyBlock with HasVariables
+  with CurlyBlock with HasVariables with SemicolonTracker
 {
-  addPart(" try {")
+  addPart(" var " + AbstractFunction.LineNumberVarName + ": uint = " + lineNum +
+    "; try {")
 
-  protected val matchers = List(Comment, Catch, LocalVariable, LocalFunction, ASString)
+  protected val matchers =
+    List(Comment, Catch, LocalVariable, LocalFunction)
+      .union(OptionalBracesBlock.allMatchers)
+      .union(StringLike.allMatchers)
 
   // Add arguments.
   AbstractFunction.ArgMatcher.findAllIn(argList).matchData.foreach { matchData =>
@@ -104,12 +109,16 @@ private[scope] abstract class AbstractFunction(
     name.getOrElse(AbstractFunction.Anonymous)
   )
 
-  protected def onClose() {
+  override def append(char: Char) =
+    semicolonAppend(char) { () => super.append(char) }
+
+  override protected def onClose() {
     addPart(
-      """} catch (%s: Error) { throw StacktraceError.trace(%s, "%s", %s); } %s """.
+      """} catch (%s: Error) { throw StacktraceError.trace(%s, "%s", %s, %s); } %s """.
         format(
           AbstractFunction.ExceptionName, AbstractFunction.ExceptionName,
-          fullName, variablesString, returnType.returnValue
+          fullName, variablesString, AbstractFunction.LineNumberVarName,
+          returnType.returnValue
         )
     )
   }

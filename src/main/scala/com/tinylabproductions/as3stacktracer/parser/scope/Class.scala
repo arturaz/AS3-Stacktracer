@@ -47,8 +47,8 @@ private[scope] class Class(body: String, name: String, parent: Scope)
 
   protected val matchers = List(
     Comment, StaticVariable, InstanceVariable,
-    StaticFunction, InstanceFunction, LocalFunction, ASString
-  )
+    StaticFunction, InstanceFunction, LocalFunction)
+    .union(StringLike.allMatchers)
 
   override private[scope] def addVariable(variable: Variable) = variable match {
     case v: ClassVariable => super.addVariable(v)
@@ -75,7 +75,7 @@ private[scope] class Class(body: String, name: String, parent: Scope)
     (HasVariables.toString(static), HasVariables.toString(static ++ instance))
   }
 
-  protected[this] def onClose() {
+  override protected[this] def onClose() {
     val (static, instance) = variableStrings
 
     // Both instance/static method have same name: mxmlc can distinguish which one to

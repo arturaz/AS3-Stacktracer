@@ -1,6 +1,7 @@
 package com.tinylabproductions.as3stacktracer.parser
 
 import scope.Matcher
+import collection.mutable.ListBuffer
 
 /**
  * Created by IntelliJ IDEA.
@@ -17,14 +18,24 @@ private[parser] abstract class Scope(
   protected[this] val matchers: List[Matcher]
   protected[this] val scopeType: String
 
-  private[this] var _parts = List.empty[Either[String, Scope]]
+  private[this] val _parts = ListBuffer.empty[Either[String, Scope]]
   def parts = _parts
   
-  protected[this] def addPart(c: Char) { _parts = parts :+ Left(c.toString) }
-  protected[this] def addPart(s: String) { _parts = parts :+ Left(s) }
-  protected[this] def addPart(s: Scope) { _parts = parts :+ Right(s) }
+  protected[this] def addPart(c: Char) { _parts += Left(c.toString) }
+  protected[this] def addPart(s: String) { _parts += Left(s) }
+  protected[this] def addPart(s: Scope) { _parts += Right(s) }
 
   private[this] val buffer: StringBuilder = new StringBuilder
+
+  protected def lineCounter: LineCounter = parent match {
+    case Some(p) => p.lineCounter
+    case None => throw new RuntimeException(
+      "Cannot find line counter, consider overriding this method in root " +
+      "class!"
+    )
+  }
+
+  private[parser] def lineNum = lineCounter.currentLineNum
 
   override def toString = "<Scope.%s name: %s, parent: %s>".format(
     scopeType, name, parent.toString
@@ -39,7 +50,8 @@ private[parser] abstract class Scope(
   }
 
   private[parser] def clearBuffer() {
-    addPart(buffer.toString())
+    val str = buffer.toString()
+    if (! str.isEmpty) addPart(str)
     buffer.clear()
   }
 

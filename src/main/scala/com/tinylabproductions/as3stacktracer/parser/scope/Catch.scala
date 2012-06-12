@@ -42,35 +42,43 @@ private[scope] object Catch extends Matcher {
   }
 }
 
-@EnhanceStrings
 private[scope] class Catch(
   errorName: String, errorType: String, parent: Scope
-) extends Block("catch-%s:%s".format(errorName, errorType), parent)
-  with CurlyBlock
+) extends Block("catch-"+errorName+":"+errorType, parent)
+  with CurlyBlock with SemicolonTracker
 {
   {
     val catched = "___st_catched_e"
     // Avoid duplicate variable definition warnings.
-    val unwrapped = "___st_unwrapped_e_%d".format(File.nextCatchIndex)
+    val unwrapped = "___st_unwrapped_e_"+File.nextCatchIndex
 
     addPart(
-      """catch(#catched: Error) {
-  var #unwrapped: Error = (#catched is StacktraceError) ? (#catched as StacktraceError).cause : #catched;
-  if (! (#unwrapped is #errorType)) throw #catched;
-  else
-    // This is needed because variable '#errorName' might have a collision with
-    // another var somewhere, however this rule does not exist in catch clause.
-    try { throw #unwrapped as #errorType; }
-    catch (#errorName: #errorType) {"""
+      "catch("+catched+": Error) {\n"+
+        "var "+unwrapped+": Error = ("+catched+" is StacktraceError) "+
+          "? ("+catched+" as StacktraceError).cause : "+catched+";\n"+
+        "if (! ("+unwrapped+" is "+errorType+")) throw "+catched+";\n"+
+        "else\n"+
+        "// This is needed because variable '"+errorName+"' might have a \n"+
+        "// collision with another var somewhere, however this rule does \n"+
+        "// not exist in catch clause.\n"+
+        "try { throw "+unwrapped+" as "+errorType+"; }\n"+
+        "catch ("+errorName+": "+errorType+") {"+
+          AbstractFunction.LineNumberVarName+"="+lineNum+";"
     )
   }
 
   protected[this] val scopeType = "Catch"
   def qualifiedName = name
 
-  protected val matchers = List(Comment, LocalFunction, ASString)
+  protected val matchers =
+    List(Comment, LocalFunction)
+      .union(OptionalBracesBlock.allMatchers)
+      .union(StringLike.allMatchers)
 
-  protected[this] def onClose() {
+  override def append(char: Char) =
+    semicolonAppend(char) { () => super.append(char) }
+
+  override protected[this] def onClose() {
     addPart(ClosingChar)
   }
 }

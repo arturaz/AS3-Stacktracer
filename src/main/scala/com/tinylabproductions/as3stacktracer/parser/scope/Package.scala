@@ -45,5 +45,5 @@ private[scope] class Package(body: String, name: String, parent: Scope)
 
   protected val matchers = List(Comment, Class, LocalFunction, ASString)
 
-  protected[this] def onClose() {}
+  override protected[this] def onClose() {}
 }

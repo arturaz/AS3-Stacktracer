@@ -19,8 +19,8 @@ private[scope] abstract class Block(name: String, parent: Scope)
     addPart(body)
   }
 
-  protected[this] val OpeningChar: Char
-  protected[this] val ClosingChar: Char
+  protected[this] def OpeningChar: Char
+  protected[this] def ClosingChar: Char
 
   // 1 because initial opening brace is consumed in matching.
   private[this] var blockCounter = 1
@@ -34,6 +34,7 @@ private[scope] abstract class Block(name: String, parent: Scope)
       clearBuffer()
       onClose()
       addPart(char.toString)
+      afterClose()
       parent
     }
     else {
@@ -45,5 +46,6 @@ private[scope] abstract class Block(name: String, parent: Scope)
     }
   }
 
-  protected[this] def onClose()
+  protected[this] def onClose() {}
+  protected[this] def afterClose() {}
 }

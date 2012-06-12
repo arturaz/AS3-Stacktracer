@@ -97,11 +97,11 @@ Usage:
       
       if (srcAbs.endsWith(".as") || srcAbs.endsWith(".mxml")) {
         if (shouldSkip(srcRel)) {
-          run('s', "Skipping (copying): %s".format(srcRel))
+          run('s', "Skipping (copying): "+srcRel)
             { () => copy(src, dst) }
         }
         else {
-          run('p', "Processing: %s".format(srcRel)) { () =>
+          run('p', "Processing: "+srcRel) { () =>
             dst.parent.map { _.createDirectory(failIfExists = false) }
             convert(src, srcRel, dst)
           }

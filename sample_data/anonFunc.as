@@ -1,19 +1,49 @@
 package {
 class Foo {
 
-    var zug: String = "Bitch, \" }}}}}}} please.\\"
+    var r:RegExp = /abc[as]/g;
+    var zug: String = "Bitch, \" }}}}}}} please.\\";
+
+    private static function controlFlow(param: String = null) {
+        for each (var n: Number
+                in [1, 2, 3] // first three natural numbers
+                )
+            process(n);
+
+        if (0 < 1) {
+            doSomething0();
+        }
+        else if (0
+                >
+                1)
+
+            doSomething1();
+
+
+        // Never gonna happen
+        else doSomething2();
+
+        do {
+            process(n);
+        }
+        while (true)
+
+        while (isTrue()) {
+            falsify();
+        }
+    }
 
     private var a: Function = function(): String {
-        var zug: String = "Bitch, \" }}}}}}} please.\\"
+        var zug: String = "Bitch, \" }}}}}}} please.\\";
 		
         function nxnx(c: String) {
-            var zug: String = "Bitch, \" }}}}}}} please.\\"
+            var zug: String = "Bitch, \" }}}}}}} please.\\";
             return c;
         }
         return zug;
 
         try {
-            foo()
+            foo();
         }
         catch (z: LameError) {
             doStuff(z);

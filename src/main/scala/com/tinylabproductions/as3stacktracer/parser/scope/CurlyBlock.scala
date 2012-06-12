@@ -9,6 +9,6 @@ package com.tinylabproductions.as3stacktracer.parser.scope
  */
 
 private[scope] trait CurlyBlock { this: Block =>
-  protected[this] val OpeningChar = '{'
-  protected[this] val ClosingChar = '}'
+  protected[this] def OpeningChar = '{'
+  protected[this] def ClosingChar = '}'
 }

@@ -1,6 +1,7 @@
 package com.tinylabproductions.as3stacktracer.parser.scope
 
-import com.tinylabproductions.as3stacktracer.parser.Scope
+import com.tinylabproductions.as3stacktracer.parser.{LineCounter, Scope}
+
 
 /**
  * Created by IntelliJ IDEA.
@@ -10,16 +11,21 @@ import com.tinylabproductions.as3stacktracer.parser.Scope
  * To change this template use File | Settings | File Templates.
  */
 
-private[parser] abstract class File(name: String) extends Scope(name, None) {
+private[parser] abstract class File(name: String, _lineCounter: LineCounter)
+extends Scope(name, None) {
   File.resetCatchIndex()
 
   def qualifiedName = name
+
+  override protected def lineCounter = _lineCounter
 }
 
 private[parser] object File {
-  def apply(filename: String): File = {
-    if (filename.endsWith(".as")) return new AsFile(filename)
-    else if (filename.endsWith(".mxml")) return new MxmlFile(filename)
+  def apply(filename: String, lineCounter: LineCounter): File = {
+    if (filename.endsWith(".as"))
+      return new AsFile(filename, lineCounter)
+    else if (filename.endsWith(".mxml"))
+      return new MxmlFile(filename, lineCounter)
     else throw new IllegalArgumentException(
       "Unsupported file: %s. Supported extensions: as, mxml.".format(filename)
     )
@@ -33,7 +39,8 @@ private[parser] object File {
     catchIndex
   }
 
-  class AsFile(name: String) extends File(name) {
+  class AsFile(name: String, lineCounter: LineCounter)
+  extends File(name, lineCounter) {
     protected[this] val scopeType = "AsFile"
     protected val matchers = List(Comment, Package, Class, LocalFunction)
 
@@ -47,7 +54,8 @@ private[parser] object File {
     }
   }
 
-  class MxmlFile(name: String) extends File(name) {
+  class MxmlFile(name: String, lineCounter: LineCounter)
+  extends File(name, lineCounter) {
     protected[this] val scopeType = "MxmlFile"
     protected val matchers = List(Script)
   }

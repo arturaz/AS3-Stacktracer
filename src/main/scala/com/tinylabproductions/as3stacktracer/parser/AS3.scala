@@ -18,11 +18,15 @@ object AS3 {
   }
 }
 
-class AS3(filename: String) {
-  private[this] var scope: Scope = File(filename)
+class AS3(filename: String) extends LineCounter {
+  private[this] var scope: Scope = File(filename, this)
+
+  private[this] var _lineNumber: Int = 1
+  override def currentLineNum = _lineNumber
 
   def parse(input: Traversable[Char]) = {
     input.foreach { char =>
+      if (char == '\n') _lineNumber += 1
       scope = scope.append(char)
     }
 
