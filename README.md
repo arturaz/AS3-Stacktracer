@@ -59,50 +59,50 @@ Java regexp modifier flags (i.e. "(?i)foo") can be used here.
 
 * All statements must be terminated with semicolon
 
-    // not supported: must have ; at the end of statement
-    a++
+        // not supported: must have ; at the end of statement
+        a++
 
 * Line numbers are supported but only inside functions for now and they
 are not always exact.
 
 * Cannot have string literals as default values for function arguments
 
-    // Unsupported. Extract to a constant
-    function foo(name: String = "Unknown"): void {}
+        // Unsupported. Extract to a constant
+        function foo(name: String = "Unknown"): void {}
 
-    // OK
-    private static const DEFAULT_NAME = "Unknown";
-    function foo(name: String = DEFAULT_NAME): void {}
+        // OK
+        private static const DEFAULT_NAME = "Unknown";
+        function foo(name: String = DEFAULT_NAME): void {}
 
 * Cannot have comments
 
     - between package/class/function declaration and body.
 
-        package foo 
-        // This is not supported
-        {
-          ...
-        }
+            package foo
+            // This is not supported
+            {
+              ...
+            }
 
     - between if and (...), else and if, else and it's body
 
-        if /* not supported */ (...) {}
-        else /* not supported */ if (...) {}
-        else // not supported
-        {...}
+            if /* not supported */ (...) {}
+            else /* not supported */ if (...) {}
+            else // not supported
+            {...}
 
-        // Legal comment
-        if (...) {}
-        // Legal comment
-        else if (...) {}
-        // Legal comment
-        else
-        {...}
+            // Legal comment
+            if (...) {}
+            // Legal comment
+            else if (...) {}
+            // Legal comment
+            else
+            {...}
 
     - between for and each, loop keyword and (...)
 
-        for /* not supported */ each /* not supported */ (...) {}
-        while /* not supported */ (...) {}
+            for /* not supported */ each /* not supported */ (...) {}
+            while /* not supported */ (...) {}
 
 * Variables declared without var are not tracked.
 
@@ -111,28 +111,28 @@ are not always exact.
 * Regular expressions that have quotes (single or double) in their body will
 cause errors after preprocessing.
 
-    // Not OK. Use:
-    // new RegExp("abc['\"]", "g")
-    var r: RegExp = /abc['"]/g;
+        // Not OK. Use:
+        // new RegExp("abc['\"]", "g")
+        var r: RegExp = /abc['"]/g;
 
-    // OK. No quotes in the body.
-    var r: RegExp = /abc/g
+        // OK. No quotes in the body.
+        var r: RegExp = /abc/g
 
 * Braces are still optional after control flow statements if their body contains
 only one statement, but there is one caveat: you must use braces if control flow
 body contains if else block
 
-    // Not OK. Preprocessor will enclose the inner if statement inside braces
-    // but will leave out the else part.
-    for (i: int = 0; i < 10; i++)
-        if (i < 5) foo();
-        else bar();
+        // Not OK. Preprocessor will enclose the inner if statement inside braces
+        // but will leave out the else part.
+        for (i: int = 0; i < 10; i++)
+            if (i < 5) foo();
+            else bar();
 
-    // This is OK.
-    for (i: int = 0; i < 10; i++) {
-        if (i < 5) foo();
-        else bar();
-    }
+        // This is OK.
+        for (i: int = 0; i < 10; i++) {
+            if (i < 5) foo();
+            else bar();
+        }
 
 * Multiple nested try/catch blocks are not supported.
         
